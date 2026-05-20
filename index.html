@@ -7,8 +7,9 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #0f121d;
-            --card-bg: linear-gradient(180deg, #232a3b 0%, #151925 100%);
+            --bg-color: #0b0e14;
+            --card-bg: linear-gradient(180deg, #1e2533 0%, #121620 100%);
+            --accent: #6366f1;
             --text-main: #ffffff;
             --text-dim: #94a3b8;
         }
@@ -16,165 +17,201 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            color: #fff;
+        /* --- SEARCH & FILTER SECTION --- */
+        .controls-container {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: left;
         }
 
+        .search-box {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        .gen-btn {
+            background: #1e293b;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .gen-btn:hover { background: #334155; }
+        .gen-btn.active { background: var(--accent); box-shadow: 0 0 15px var(--accent); }
+
+        /* --- GRID & CARDS --- */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 25px;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
-            position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: 0.3s;
             cursor: pointer;
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .number { color: rgba(255,255,255,0.1); font-weight: bold; font-size: 1.2rem; text-align: left; }
+        .card img { width: 160px; height: 160px; object-fit: contain; margin: 10px 0; }
+        .name { font-size: 1.5rem; font-weight: bold; text-transform: capitalize; margin: 10px 0; }
+        
+        .types { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
+        .type-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+        .description { color: var(--text-dim); font-size: 0.85rem; line-height: 1.4; font-style: italic; }
 
-        .number {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: rgba(255,255,255,0.1);
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .card img {
-            width: 180px;
-            height: 180px;
-            object-fit: contain;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
-        }
-
-        .name {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin: 10px 0;
-            text-transform: capitalize;
-        }
-
-        .types {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .type-pill {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .description {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-top: 15px;
-            min-height: 60px;
-        }
-
-        /* Type Colors from the image */
-        .dragon { background: #6f35fc; }
-        .psychic { background: #f95587; }
-        .water { background: #6390f0; }
-        .ground { background: #e2bf65; }
-        .fire { background: #ee8130; }
-        .ice { background: #96d9d6; }
-        .electric { background: #f7d02c; }
-        .flying { background: #a98ff3; }
-        .grass { background: #7ac74c; }
-        .steel { background: #b7b7ce; }
-
+        /* Colors */
+        .dragon { background: #6f35fc; } .psychic { background: #f95587; }
+        .water { background: #6390f0; } .ground { background: #e2bf65; }
+        .fire { background: #ee8130; } .ice { background: #96d9d6; }
+        .electric { background: #f7d02c; } .flying { background: #a98ff3; }
+        .steel { background: #b7b7ce; } .ghost { background: #705798; }
     </style>
 </head>
 <body>
 
-    <h1>ARIO'S LEGENDARY COLLECTION</h1>
+    <h1 style="text-align:center; margin-bottom:10px;">ARIO'S LEGENDARY POKÉDEX</h1>
+
+    <div class="controls-container">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search by name, type, or National Dex number...">
+        
+        <div class="filter-row">
+            <span class="filter-label">GENERATIONS:</span>
+            <button class="gen-btn active" onclick="filterGen('all', this)">All</button>
+            <button class="gen-btn" onclick="filterGen(1, this)">Gen I</button>
+            <button class="gen-btn" onclick="filterGen(2, this)">Gen II</button>
+            <button class="gen-btn" onclick="filterGen(3, this)">Gen III</button>
+            <button class="gen-btn" onclick="filterGen(4, this)">Gen IV</button>
+        </div>
+    </div>
+
     <div class="container" id="poke-container"></div>
 
 <script>
-    // List of the first few Legendaries
-    const legendaries = [144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 380, 381, 382, 383, 384];
-    const container = document.getElementById('poke-container');
+    // Comprehensive Legendary List (Gens 1-4)
+    const pokeData = [
+        { id: 144, gen: 1 }, { id: 145, gen: 1 }, { id: 146, gen: 1 }, { id: 150, gen: 1 }, { id: 151, gen: 1 },
+        { id: 243, gen: 2 }, { id: 244, gen: 2 }, { id: 245, gen: 2 }, { id: 249, gen: 2 }, { id: 250, gen: 2 }, { id: 251, gen: 2 },
+        { id: 377, gen: 3 }, { id: 378, gen: 3 }, { id: 379, gen: 3 }, { id: 380, gen: 3 }, { id: 381, gen: 3 }, { id: 382, gen: 3 }, { id: 383, gen: 3 }, { id: 384, gen: 3 }, { id: 385, gen: 3 }, { id: 386, gen: 3 },
+        { id: 480, gen: 4 }, { id: 481, gen: 4 }, { id: 482, gen: 4 }, { id: 483, gen: 4 }, { id: 484, gen: 4 }, { id: 485, gen: 4 }, { id: 486, gen: 4 }, { id: 487, gen: 4 }, { id: 488, gen: 4 }, { id: 490, gen: 4 }, { id: 491, gen: 4 }, { id: 493, gen: 4 }
+    ];
 
-    async function fetchPokemonData() {
-        for (const id of legendaries) {
-            // Get basic data (images/types)
-            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    let allPokemonObjects = [];
+    let currentGen = 'all';
+
+    async function init() {
+        const container = document.getElementById('poke-container');
+        
+        for (const p of pokeData) {
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${p.id}`);
             const data = await res.json();
-
-            // Get species data (for the description)
-            const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+            
+            const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${p.id}`);
             const speciesData = await speciesRes.json();
-            const description = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en').flavor_text.replace(/[\f\n\r]/g, ' ');
+            const desc = speciesData.flavor_text_entries.find(e => e.language.name === 'en').flavor_text.replace(/[\f\n\r]/g, ' ');
 
-            createCard(data, description);
+            const pokemonObj = { ...data, description: desc, gen: p.gen };
+            allPokemonObjects.push(pokemonObj);
+            renderCard(pokemonObj);
         }
     }
 
-    function createCard(pokemon, desc) {
+    function renderCard(pokemon) {
+        const container = document.getElementById('poke-container');
         const card = document.createElement('div');
         card.className = 'card';
-        
-        // Format ID like #0381
-        const pokedexId = "#" + pokemon.id.toString().padStart(4, '0');
-        
-        // Generate Type Pills
-        const typesHTML = pokemon.types.map(t => 
-            `<span class="type-pill ${t.type.name}">${t.type.name}</span>`
-        ).join('');
+        card.dataset.id = pokemon.id;
+        card.dataset.name = pokemon.name;
+        card.dataset.gen = pokemon.gen;
+        card.dataset.types = pokemon.types.map(t => t.type.name).join(',');
+
+        const typesHTML = pokemon.types.map(t => `<span class="type-pill ${t.type.name}">${t.type.name}</span>`).join('');
 
         card.innerHTML = `
-            <div class="number">${pokedexId}</div>
-            <img src="${pokemon.sprites.other['official-artwork'].front_default}" alt="${pokemon.name}">
+            <div class="number">#${pokemon.id.toString().padStart(4, '0')}</div>
+            <img src="${pokemon.sprites.other['official-artwork'].front_default}">
             <div class="name">${pokemon.name}</div>
             <div class="types">${typesHTML}</div>
-            <div class="description">"${desc}"</div>
+            <div class="description">"${pokemon.description}"</div>
         `;
 
-        // Click to play Sound + Confetti
         card.onclick = () => {
-            const cry = new Audio(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`);
-            cry.play();
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.8 },
-                colors: ['#6390f0', '#f95587', '#ffffff']
-            });
+            new Audio(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`).play();
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.8 } });
         };
 
         container.appendChild(card);
     }
 
-    fetchPokemonData();
+    // --- FILTER LOGIC ---
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            const name = card.dataset.name.toLowerCase();
+            const id = card.dataset.id;
+            const types = card.dataset.types.toLowerCase();
+            const gen = card.dataset.gen;
+
+            const matchesSearch = name.includes(searchTerm) || id.includes(searchTerm) || types.includes(searchTerm);
+            const matchesGen = currentGen === 'all' || gen == currentGen;
+
+            card.style.display = (matchesSearch && matchesGen) ? 'block' : 'none';
+        });
+    }
+
+    function filterGen(gen, btn) {
+        currentGen = gen;
+        document.querySelectorAll('.gen-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    init();
 </script>
 </body>
 </html>
