@@ -1,48 +1,180 @@
-<!-- Save as ario-pokedex-pro.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ario's Legendary Pokédex</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { font-family: 'Arial', sans-serif; background: #222; color: white; text-align: center; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 20px; }
-        .card { background: #333; border: 3px solid #ffde00; border-radius: 15px; padding: 15px; cursor: pointer; transition: 0.3s; }
-        .card:hover { transform: translateY(-10px); background: #444; border-color: #ff0000; }
-        img { width: 100%; filter: drop-shadow(2px 4px 6px black); }
-        .btn { background: #ffde00; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        h1 { font-size: 3rem; color: #ffde00; text-shadow: 3px 3px #3b4cca; }
+        :root {
+            --bg-color: #0f121d;
+            --card-bg: linear-gradient(180deg, #232a3b 0%, #151925 100%);
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .number {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255,255,255,0.1);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .card img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+
+        .name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+            text-transform: capitalize;
+        }
+
+        .types {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .type-pill {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .description {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-top: 15px;
+            min-height: 60px;
+        }
+
+        /* Type Colors from the image */
+        .dragon { background: #6f35fc; }
+        .psychic { background: #f95587; }
+        .water { background: #6390f0; }
+        .ground { background: #e2bf65; }
+        .fire { background: #ee8130; }
+        .ice { background: #96d9d6; }
+        .electric { background: #f7d02c; }
+        .flying { background: #a98ff3; }
+        .grass { background: #7ac74c; }
+        .steel { background: #b7b7ce; }
+
     </style>
 </head>
 <body>
-    <h1>ARIO'S LEGENDS</h1>
-    <div class="grid" id="list"></div>
 
-    <script>
-        const ids = [144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 382, 383, 384, 483, 484]; // Shortened list for speed
-        const list = document.getElementById('list');
+    <h1>ARIO'S LEGENDARY COLLECTION</h1>
+    <div class="container" id="poke-container"></div>
 
-        ids.forEach(id => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png">
-                <button class="btn">CATCH IT!</button>
-            `;
-            
-            // Play Cry when clicked
-            card.onclick = () => {
-                new Audio(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`).play();
-            };
+<script>
+    // List of the first few Legendaries
+    const legendaries = [144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 380, 381, 382, 383, 384];
+    const container = document.getElementById('poke-container');
 
-            // Confetti when button clicked
-            card.querySelector('button').onclick = (e) => {
-                e.stopPropagation();
-                confetti({ particleCount: 150, spread: 60 });
-            };
+    async function fetchPokemonData() {
+        for (const id of legendaries) {
+            // Get basic data (images/types)
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+            const data = await res.json();
 
-            list.appendChild(card);
-        });
-    </script>
+            // Get species data (for the description)
+            const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+            const speciesData = await speciesRes.json();
+            const description = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en').flavor_text.replace(/[\f\n\r]/g, ' ');
+
+            createCard(data, description);
+        }
+    }
+
+    function createCard(pokemon, desc) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        // Format ID like #0381
+        const pokedexId = "#" + pokemon.id.toString().padStart(4, '0');
+        
+        // Generate Type Pills
+        const typesHTML = pokemon.types.map(t => 
+            `<span class="type-pill ${t.type.name}">${t.type.name}</span>`
+        ).join('');
+
+        card.innerHTML = `
+            <div class="number">${pokedexId}</div>
+            <img src="${pokemon.sprites.other['official-artwork'].front_default}" alt="${pokemon.name}">
+            <div class="name">${pokemon.name}</div>
+            <div class="types">${typesHTML}</div>
+            <div class="description">"${desc}"</div>
+        `;
+
+        // Click to play Sound + Confetti
+        card.onclick = () => {
+            const cry = new Audio(`https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`);
+            cry.play();
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.8 },
+                colors: ['#6390f0', '#f95587', '#ffffff']
+            });
+        };
+
+        container.appendChild(card);
+    }
+
+    fetchPokemonData();
+</script>
 </body>
 </html>
